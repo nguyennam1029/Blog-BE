@@ -1,0 +1,25 @@
+# GET http://localhost:5000/
+###
+# GET http://localhost:5000/api/v1/user
+
+
+
+POST http://localhost:5000/api/v1/auth/login
+Content-Type: application/json
+
+ {
+     "email": "nam1029@gmail.com",
+    "password": "123456789"
+}
+### 
+POST http://localhost:5000/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "email": "nam1029@gmail.com",
+    "password": "123456789"
+}
+
+### 
+GET http://localhost:5000/api/v1/user/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYsImVtYWlsIjoibmFtMTAyOUBnbWFpbC5jb20iLCJpYXQiOjE3MDUzOTU1NjMsImV4cCI6MTcwNTgyNzU2M30.ww59yEFo_0wNjPRTwjNTbu4sxzMzudI3wmKJpaCzG3s
