@@ -23,3 +23,8 @@ Content-Type: application/json
 ### 
 GET http://localhost:5000/api/v1/user/
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYsImVtYWlsIjoibmFtMTAyOUBnbWFpbC5jb20iLCJpYXQiOjE3MDUzOTU1NjMsImV4cCI6MTcwNTgyNzU2M30.ww59yEFo_0wNjPRTwjNTbu4sxzMzudI3wmKJpaCzG3s
+### 
+GET http://localhost:5000/api/v1/post/
+### 
+GET http://localhost:5000/api/v1/category
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYsImVtYWlsIjoibmFtMTAyOUBnbWFpbC5jb20iLCJpYXQiOjE3MDUzOTU1NjMsImV4cCI6MTcwNTgyNzU2M30.ww59yEFo_0wNjPRTwjNTbu4sxzMzudI3wmKJpaCzG3s

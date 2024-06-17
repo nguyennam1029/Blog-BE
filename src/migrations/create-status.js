@@ -2,33 +2,18 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Posts", {
+    await queryInterface.createTable("Statuses", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      title: {
+      value: {
         type: Sequelize.STRING,
       },
-      image: {
+      code: {
         type: Sequelize.STRING,
-      },
-      description: {
-        type: Sequelize.TEXT,
-      },
-      category_code: {
-        type: Sequelize.STRING,
-        defaultValue: "coder",
-      },
-      status_code: {
-        type: Sequelize.STRING,
-        defaultValue: "Technology",
-      },
-      author_code: {
-        type: Sequelize.STRING,
-        defaultValue: 1,
       },
       createdAt: {
         type: "TIMESTAMP",
@@ -43,6 +28,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Posts");
+    await queryInterface.dropTable("Statuses");
   },
 };
