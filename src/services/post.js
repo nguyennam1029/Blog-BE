@@ -107,13 +107,25 @@ export const getPostDetail = ({ id }) =>
         raw: true,
         nest: true,
         attributes: {
-          exclude: ["category_code"],
+          exclude: ["category_code", "status_code", "author_code"],
         },
         include: [
           {
             model: db.Category,
-            attributes: ["value"], // Include only the "value" attribute
             as: "categoryData",
+            attributes: ["id", "code", "value"],
+            // where: whereCategory,
+          },
+          {
+            model: db.Status,
+            as: "statusData",
+            attributes: ["id", "code", "value"],
+            // where: whereStatus,
+          },
+          {
+            model: db.User,
+            as: "authorData",
+            attributes: ["id", "name", "email"],
           },
         ],
       });
@@ -128,7 +140,6 @@ export const getPostDetail = ({ id }) =>
         resolve({
           err: 1,
           mes: "Post not found",
-          data: null,
         });
       }
     } catch (error) {
