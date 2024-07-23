@@ -3,26 +3,25 @@ import db from "../models";
 import { Op } from "sequelize";
 const Sequelize = require("sequelize");
 // ================== createNewPost ================
-export const createNewPost = (req) =>
-  new Promise(async (resolve, reject) => {
-    const { title } = req;
+export const createNewPost = async (postData) => {
+  const { title, ...rest } = postData;
 
-    try {
-      const [post, created] = await db.Post.findOrCreate({
-        where: { title: title },
-        defaults: req,
-      });
-      console.log(created);
-      resolve({
-        err: created ? 0 : 1,
-        mes: created
-          ? "Post created successfully"
-          : "Cannot create new post - Title already in use",
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
+  try {
+    const [post, created] = await db.Post.findOrCreate({
+      where: { title },
+      defaults: { title, ...rest },
+    });
+
+    return {
+      err: created ? 0 : 1,
+      mes: created
+        ? "Post created successfully"
+        : "Cannot create new post - Title already in use",
+    };
+  } catch (error) {
+    throw new Error("Internal server error");
+  }
+};
 
 // ================== UpdatePost ================
 export const updatePost = ({ id, ...body }) =>
@@ -125,7 +124,7 @@ export const getPostDetail = ({ id }) =>
           {
             model: db.User,
             as: "authorData",
-            attributes: ["id", "name", "email"],
+            attributes: ["id", "name", "email", "role_code"],
           },
         ],
       });
@@ -146,26 +145,93 @@ export const getPostDetail = ({ id }) =>
       reject(error);
     }
   });
+// export const getPosts = ({
+//   page,
+//   limit,
+//   order,
+//   title,
+//   category,
+//   status_ac,
+//   ...query
+// }) =>
+//   new Promise(async (resolve, reject) => {
+//     try {
+//       const queries = { raw: true, nest: true };
+//       const offset = !page || +page <= 1 ? 0 : +page - 1;
+//       const fLimit = +limit || +process.env.LIMIT_POST;
+//       queries.offset = offset * fLimit;
+//       queries.limit = fLimit;
+//       if (order) queries.order = [order];
+//       if (title) query.title = { [Op.substring]: title };
+//       // const whereCategory = category ? { code: { [Op.eq]: category } } : {};
+//       // const whereStatus = status ? { code: { [Op.eq]: status } } : {};
+//       const whereClause = {
+//         ...query,
+//       };
+
+//       if (category) {
+//         whereClause.category_code = { [Op.eq]: category };
+//       }
+
+//       if (status_ac) {
+//         whereClause.status_code = { [Op.eq]: status_ac };
+//       }
+//       const { count, rows: data } = await db.Post.findAndCountAll({
+//         where: whereClause,
+//         ...queries,
+//         attributes: {
+//           exclude: ["category_code", "status_code", "author_code"],
+//         },
+//         include: [
+//           {
+//             model: db.Category,
+//             as: "categoryData",
+//             attributes: ["id", "code", "value"],
+//             // where: whereCategory,
+//           },
+//           {
+//             model: db.Status,
+//             as: "statusData",
+//             attributes: ["id", "code", "value"],
+//             // where: whereStatus,
+//           },
+//           {
+//             model: db.User,
+//             as: "authorData",
+//             attributes: ["id", "name", "email", "role_code"],
+//           },
+//         ],
+//       });
+//       resolve({
+//         err: data ? 0 : 1,
+//         mes: data ? "Get Posts successfully" : "Cannot get posts",
+//         count,
+//         data,
+//       });
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+
 export const getPosts = ({
   page,
   limit,
   order,
   title,
   category,
-  status_ac,
+  status,
   ...query
 }) =>
   new Promise(async (resolve, reject) => {
     try {
       const queries = { raw: true, nest: true };
-      const offset = !page || +page <= 1 ? 0 : +page - 1;
+      const offset = !page || +page <= 1 ? 0 : (+page - 1) * +limit;
       const fLimit = +limit || +process.env.LIMIT_POST;
-      queries.offset = offset * fLimit;
+      queries.offset = offset;
       queries.limit = fLimit;
       if (order) queries.order = [order];
       if (title) query.title = { [Op.substring]: title };
-      // const whereCategory = category ? { code: { [Op.eq]: category } } : {};
-      // const whereStatus = status ? { code: { [Op.eq]: status } } : {};
+
       const whereClause = {
         ...query,
       };
@@ -174,9 +240,12 @@ export const getPosts = ({
         whereClause.category_code = { [Op.eq]: category };
       }
 
-      if (status_ac) {
-        whereClause.status_code = { [Op.eq]: status_ac };
+      if (status) {
+        whereClause.status_code = { [Op.eq]: status };
       }
+
+      // console.log("whereClause:", whereClause);
+
       const { count, rows: data } = await db.Post.findAndCountAll({
         where: whereClause,
         ...queries,
@@ -188,21 +257,20 @@ export const getPosts = ({
             model: db.Category,
             as: "categoryData",
             attributes: ["id", "code", "value"],
-            // where: whereCategory,
           },
           {
             model: db.Status,
             as: "statusData",
             attributes: ["id", "code", "value"],
-            // where: whereStatus,
           },
           {
             model: db.User,
             as: "authorData",
-            attributes: ["id", "name", "email"],
+            attributes: ["id", "name", "email", "role_code"],
           },
         ],
       });
+
       resolve({
         err: data ? 0 : 1,
         mes: data ? "Get Posts successfully" : "Cannot get posts",
@@ -210,6 +278,7 @@ export const getPosts = ({
         data,
       });
     } catch (error) {
+      console.error("Error in getPosts:", error);
       reject(error);
     }
   });

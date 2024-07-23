@@ -17,6 +17,7 @@ export const title = Joi.string().required();
 export const image = Joi.string().required();
 export const status_code = Joi.string().required();
 export const description = Joi.string().required();
+export const short_description = Joi.string().required();
 export const category_code = Joi.string().uppercase().alphanum().required();
 
 // =============== CATEGORY =================

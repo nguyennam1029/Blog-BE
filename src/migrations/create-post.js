@@ -18,6 +18,9 @@ module.exports = {
       description: {
         type: Sequelize.TEXT,
       },
+      short_description: {
+        type: Sequelize.TEXT,
+      },
       category_code: {
         type: Sequelize.STRING,
         defaultValue: "coder",

@@ -23,6 +23,7 @@ export const register = (req) =>
           email,
           name,
           password: hashPassword(password),
+          role_code: "R2",
         },
       });
       const token = created
@@ -30,7 +31,7 @@ export const register = (req) =>
             {
               id: user.id,
               email: user.email,
-              role: user.role,
+              role: user.role_code,
             },
             process.env.JWT_SECRET,
             { expiresIn: "5d" }
@@ -54,36 +55,54 @@ export const login = (req) =>
     const { email, password } = req;
 
     try {
-      const response = await db.User.findOne({
-        where: { email: email },
-        raw: false,
+      // Tìm người dùng theo email
+      const user = await db.User.findOne({
+        where: { email },
+        raw: true, // Chỉ lấy dữ liệu thô
       });
 
-      const isChecked =
-        response && bcrypt.compareSync(password, response.password);
-      const token = isChecked
-        ? jwt.sign(
-            {
-              id: response.id,
-              email: response.email,
-              role: response.role,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: "5d" }
-          )
-        : null;
+      if (!user) {
+        return resolve({
+          err: 1,
+          mes: "Email not found",
+          access_token: null,
+        });
+      }
+
+      // So sánh mật khẩu
+      const isPasswordValid = bcrypt.compareSync(password, user.password);
+
+      if (!isPasswordValid) {
+        return resolve({
+          err: 1,
+          mes: "Password is incorrect",
+          access_token: null,
+        });
+      }
+
+      // Tạo token với role_code
+      const token = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          role_code: user.role_code, // Đảm bảo bao gồm role_code
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "5d" }
+      );
 
       resolve({
-        err: token ? 0 : 1,
-        mes: !response
-          ? "Email not found"
-          : token
-          ? "Login is successfully"
-          : "Password wrong",
-        access_token: token ? `${token}` : null,
+        err: 0,
+        mes: "Login is successful",
+        access_token: token,
       });
     } catch (error) {
-      reject("err");
+      console.error("Login error:", error);
+      reject({
+        err: 1,
+        mes: "Internal server error",
+        access_token: null,
+      });
     }
   });
 
@@ -94,3 +113,48 @@ export const logOut = async (req, res) => {
     throw error;
   }
 };
+
+// ================ GET ALL USERS ===============
+export const getAllUsers = async () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { count, rows: data } = await db.User.findAndCountAll({
+        attributes: { exclude: ["password"] },
+      });
+      resolve({
+        err: data ? 0 : 1,
+        mes: data ? "Fetch users successfully" : "Cannot get users",
+
+        count,
+        data,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// ================ GET ACCOUNT ME ===============
+export const getAccountMe = (id) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const user = await db.User.findByPk(id, {
+        attributes: { exclude: ["password"] },
+      });
+
+      if (!user) {
+        resolve({
+          err: 1,
+          mes: "User not found",
+        });
+      } else {
+        resolve({
+          err: 0,
+          mes: "Fetch account successfully",
+          user,
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
