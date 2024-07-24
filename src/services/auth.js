@@ -151,7 +151,7 @@ export const getAccountMe = (id) =>
         resolve({
           err: 0,
           mes: "Fetch account successfully",
-          user,
+          data: user,
         });
       }
     } catch (error) {
